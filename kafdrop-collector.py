@@ -49,8 +49,8 @@ def getTopicsPartitionsByBroker():
                     replicas = partition['replicas']
                     for replica in replicas:
                         broker = str(replica['id'])
-                        brokersSize[broker] += 1; #Fix: é i ID do broker aqui e não a posição do array
-                        brokersTopics[broker] += topicName + ";";
+                        brokersSize[broker] += 1; #Fix: é o ID do broker aqui e não a posição do array
+                        brokersTopics[broker] += topicName + ";"
                         metricExpression = metricExpression + "brokerId:" + broker + ";"
 
                 print(metricExpression)
