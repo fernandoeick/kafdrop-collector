@@ -28,7 +28,6 @@ def getTopicsPartitionsByBroker():
 
     if allTopics:
         for topic in allTopics:
-            partitionsbyBrokerMetric = ""
             metricExpression = ""
 
             topicName = str(topic['name'])
