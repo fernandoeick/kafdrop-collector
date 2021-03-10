@@ -10,8 +10,8 @@
             "request": "launch",
             "program": "kafdrop-collector.py",
             "console": "integratedTerminal",
-            "args": ["http://localhost:9000/"]
-            //"args": ["http://ec2-3-142-52-141.us-east-2.compute.amazonaws.com:9000/"]
+            //"args": ["http://localhost:9000/"]
+            "args": ["http://3.142.149.31:9000/"]
         }
     ]
 }
