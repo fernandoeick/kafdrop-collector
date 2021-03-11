@@ -11,7 +11,7 @@
             "program": "kafdrop-collector.py",
             "console": "integratedTerminal",
             //"args": ["http://localhost:9000/"]
-            "args": ["http://3.142.149.31:9000/"]
+            "args": ["http://3.142.120.85:9000/"]
         }
     ]
 }
