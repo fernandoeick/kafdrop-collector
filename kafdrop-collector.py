@@ -19,9 +19,11 @@ def readAllBrokers():
                 brokerMetric = ({"brokerId": brokerId, "topicsName": [], "partitionIds": {}, "topicPartitions" : 0, "partitionsReplicas" : 0, "host" : broker['host'], "rack" : broker['rack']})
                 brokerMetrics[idx] = brokerMetric
     else:
+        #TODO: Verificar logs libraries
         print("No brokers were found!")
 
 def readTopicsAndPartitions():
+    #TODO: Pensar em retry, timeout, exponential backoff
     topics = requests.get(kafdropAddress +  "topic")
     allTopics = json.loads(topics.text)
 
@@ -31,9 +33,9 @@ def readTopicsAndPartitions():
 
             #if not(topicName.startswith("__")):
             requestURL = kafdropAddress +  "topic/" + topicName
-            topicDetails = requests.get(requestURL, headers={'accept': 'application/json'})
-            topicDetailsResult = json.loads(topicDetails.text)
-            partitions = topicDetailsResult['partitions']
+            topicDetailsJson = requests.get(requestURL, headers={'accept': 'application/json'})
+            topicDetailsText = json.loads(topicDetailsJson.text)
+            partitions = topicDetailsText['partitions']
 
             for partition in partitions:
                 partitionId = str(partition['id'])
@@ -45,6 +47,7 @@ def readTopicsAndPartitions():
                 lastPartitionPosition = len(brokerMetrics[idx]["partitionIds"])
                 brokerMetrics[idx]["partitionIds"][lastPartitionPosition] = partitionId
                 
+                #TODO: Vincular IDs das partitions com os tópicos
                 if(topicName not in brokerMetrics[idx]["topicsName"]):
                     lastTopicNamePosition = len(brokerMetrics[idx]["topicsName"])
                     brokerMetrics[idx]["topicsName"].insert(lastTopicNamePosition, topicName)
@@ -113,11 +116,26 @@ def printMessagesByTopicMetric():
             metricExpression = metricExpression + str(lastOffSet) + "; topic_name: " + topicName + ", cluster_hostname: " + "" + ", availability_zone: " + ""
             print(metricExpression)
 
+def getTopicConsumers():
+    topics = requests.get(kafdropAddress +  "topic")
+    allTopics = json.loads(topics.text)
+
+    if allTopics:
+        for topic in allTopics:
+            topicName = str(topic['name'])
+
+            if not(topicName.startswith("__")):
+                requestURL = kafdropAddress +  "topic/" + topicName + "/consumers"
+                topicConsumersJson = requests.get(requestURL, headers={'accept': 'application/json'})
+                topicConsumersText = json.loads(topicConsumersJson.text)
+                print(topicConsumersText)
+
 def main():
     readAllBrokers()
     readTopicsAndPartitions()
     printMetrics()
     printMessagesByTopicMetric()
-    
+    #getTopicConsumers()
+
 if __name__ == "__main__":
     main()

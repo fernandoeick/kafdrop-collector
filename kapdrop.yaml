@@ -1,0 +1,104 @@
+---
+  - name: create devops user
+    hosts: all
+    become: yes
+
+    tasks:
+     - name: User Creation
+       user:
+        name: devops
+        state: present
+        password: '$1$K27AogF.$2W/MTTta2ZLJrNP73RmgV0'
+
+     - name: Add extras repository
+       shell: yum-config-manager --enable extras
+
+     - name: install mandatory packages
+       yum:
+         name: "{{ packages }}"
+       vars:
+         packages:
+           - amazon-linux-extras
+           - git
+
+     - name: Git Kafdrop Checkout
+       ansible.builtin.git:
+         repo: 'https://github.com/obsidiandynamics/kafdrop.git'
+         dest: /opt/kafdrop-master
+         version: master
+
+     - name: Install openjdk11 with amazon-linux-extras packages
+       shell: "amazon-linux-extras install java-openjdk11 -y"
+
+     - name: Install Java Corretto 1
+       shell: "rpm --import https://yum.corretto.aws/corretto.key"
+
+     - name: Install Java Corretto 2
+       shell: "curl -L -o /etc/yum.repos.d/corretto.repo https://yum.corretto.aws/corretto.repo"
+
+     - name: Install Java Corretto 3
+       shell: "yum install -y java-11-amazon-corretto-devel"
+
+     - name: Copy cacerts file
+       ansible.builtin.copy:
+         src: /usr/lib/jvm/java-11-openjdk-11.0.9.11-0.amzn2.0.1.x86_64/lib/security/cacerts
+         dest: /opt/kafdrop-master/kafdrop.truststore.jks
+         remote_src: yes
+         owner: devops
+         group: devops
+         mode: '0644'
+
+        #TODO: Get CN from a variable file
+     - name: Generate Private Key
+       shell: "keytool -genkey -keystore /opt/kafdrop-master/kafka.client.keystore.jks -validity 300 -storepass changeit -keypass changeit -dname 'CN=ilegra-msk' -alias ilegra-msk -storetype pkcs12"
+       ignore_errors: yes
+
+        #TODO: Get CN from a variable file
+     - name: Generate Certificate Request
+       shell: "keytool -keystore /opt/kafdrop-master/kafka.client.keystore.jks -certreq -file /opt/kafdrop-master/client-cert-sign-request -alias ilegra-msk -storepass changeit -keypass changeit"
+       ignore_errors: yes
+
+     - name: Set JAVA_HOME
+       lineinfile:
+         dest: /etc/environment
+         state: present
+         regexp: '^JAVA_HOME'
+         line: 'JAVA_HOME=/usr/lib/jvm/java-11-openjdk-11.0.9.11-0.amzn2.0.1.x86_64/'
+
+     - name: Echo JAVA_HOME
+       shell: "echo $JAVA_HOME"
+       environment:
+         JAVA_HOME: '/usr/lib/jvm/java-11-openjdk-11.0.9.11-0.amzn2.0.1.x86_64/'
+
+     - name: Echo JAVA_HOME again
+       shell: "echo $JAVA_HOME"
+
+     - name: Creating Kafdrop Properties File
+       copy:
+         dest: /opt/kafdrop-master/kafka.properties
+         owner: devops
+         group: devops
+         mode: '0644'
+         content: |
+            ssl.endpoint.identification.algorithm=
+            ssl.protocol=TLS
+            ssl.key.password=changeit
+            ssl.keystore.location=/opt/kafdrop/kafka.client.keystore.jks
+            ssl.keystore.password=changeit
+            ssl.keystore.type=JKS
+            ssl.truststore.location=/opt/kafdrop/kafka.client.truststore.jks
+            ssl.truststore.type=JKS
+
+#     - name: Change mvn file execution permissions
+#       ansible.builtin.file:
+#         path: /opt/kafdrop-master/.mvn
+#         owner: devops
+#         group: devops
+#         mode: '0664
+
+#     - name: Go to the Kafdrop folder
+#       command: chdir=/opt/kafdrop-master/ ls
+
+     - name: Build Kafdrop
+       command: bash -lc "cd /opt/kafdrop-master/ && ./mvnw package"
+#       shell: "./mvnw package"
