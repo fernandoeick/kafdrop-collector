@@ -1,0 +1,49 @@
+---
+  - name: User Creation - devops
+    user:
+      name: devops
+      state: present
+      password: '$1$K27AogF.$2W/MTTta2ZLJrNP73RmgV0'
+
+  - name: Add Extras Repositories
+    shell: yum-config-manager --enable extras
+
+  - name: Install Mandatory Packages
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+       - amazon-linux-extras
+       - git
+       - java-11-amazon-corretto
+
+  - name: Git Kafdrop Stable Version Checkout
+    ansible.builtin.git:
+      repo: "{{ kafdrop_repo_location }}"
+      dest: "{{ kafdrop_location }}"
+      version: "{{ kafdrop_stable_version }}"
+
+  - name: Copy cacerts File
+    ansible.builtin.copy:
+      src: /usr/lib/jvm/java-11-amazon-corretto.x86_64/lib/security/cacerts
+      dest: "{{ kafdrop_location }}/{{ truststore_name }}"
+      remote_src: yes
+      owner: devops
+      group: devops
+      mode: '0644'
+
+  - name: Generate Private Key
+    shell: "keytool -genkey -keystore {{ kafdrop_location }}/{{ keystore_name }} -validity {{ key_validity }} -storepass changeit -keypass changeit -dname CN='{{ msk_alias }}' -alias {{ msk_alias }} -storetype pkcs12"
+    ignore_errors: yes
+
+  - name: Generate Certificate Request
+    shell: "keytool -keystore {{ kafdrop_location }}/{{ keystore_name }} -certreq -file /opt/kafdrop/client-cert-sign-request -alias '{{ msk_alias }}' -storepass changeit -keypass changeit"
+    ignore_errors: yes
+
+  - name: Creates Kafdrop Properties File
+    copy:
+      src: kafka.properties
+      dest: "{{ kafdrop_location }}"
+
+  - name: Build Kafdrop
+    command: bash -lc "cd {{ kafdrop_location }}/ && ./mvnw package"

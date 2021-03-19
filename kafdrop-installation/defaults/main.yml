@@ -1,0 +1,8 @@
+---
+msk_alias: ilegra-msk
+kafdrop_location: /opt/kafdrop
+kafdrop_repo_location: https://github.com/obsidiandynamics/kafdrop.git
+kafdrop_stable_version: 3.27.0
+truststore_name: kafdrop.truststore.jks
+keystore_name: kafka.client.keystore.jks
+key_validity: 300
