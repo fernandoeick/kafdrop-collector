@@ -16,7 +16,7 @@ def readAllBrokers():
                 requestURL = kafdropAddress + "broker/" + brokerId
                 brokersJson = requests.get(requestURL, headers={'accept': 'application/json'})
                 brokersText = json.loads(brokersJson.text)
-                brokerMetric = ({"brokerId": brokerId, "topicsName": [], "partitionIds": {}, "topicPartitions" : 0, "partitionsReplicas" : 0, "host" : broker['host'], "rack" : broker['rack']})
+                brokerMetric = ({"brokerId": brokerId, "topicsName": [], "partitionIds": {}, "topicPartitions" : 0, "partitionsReplicas" : 0, "host" : broker['host'], "rack" : "N/A" if broker['rack']==None else broker['rack']})
                 brokerMetrics[idx] = brokerMetric
     else:
         #TODO: Verificar logs libraries
@@ -68,36 +68,40 @@ def getIdx(brokerIdToFind):
             return idx
 
 def printMetrics():
-    for idx, metricDict in brokerMetrics.items():
-        brokerId = brokerMetrics[idx]["brokerId"]
-        topicNames = brokerMetrics[idx]["topicsName"]
-        host = brokerMetrics[idx]["host"]
-        rack = brokerMetrics[idx]["rack"]
+    if brokerMetrics:
+        for idx, metricDict in brokerMetrics.items():
+            brokerId = brokerMetrics[idx]["brokerId"]
+            topicNames = brokerMetrics[idx]["topicsName"]
+            host = brokerMetrics[idx]["host"]
+            rack = brokerMetrics[idx]["rack"]
 
-        metricExpression = "aws.kafka.kafdrop.broker_topics: "
-        metricExpression = metricExpression + str(len(topicNames)) + "; broker_id: " + brokerId + ", cluster_hostname: " + host + ", availability_zone: " + rack
-        print(metricExpression)
+            metricExpression = "aws.kafka.kafdrop.broker_topics: "
+            metricExpression = metricExpression + str(len(topicNames)) + "; broker_id: " + brokerId + ", cluster_hostname: " + host + ", availability_zone: " + rack
+            print(metricExpression)
 
-    for idx, metricDict in brokerMetrics.items():
-        brokerId = brokerMetrics[idx]["brokerId"]
-        topicPartitions = brokerMetrics[idx]["topicPartitions"]
-        host = brokerMetrics[idx]["host"]
-        rack = brokerMetrics[idx]["rack"]
+        for idx, metricDict in brokerMetrics.items():
+            brokerId = brokerMetrics[idx]["brokerId"]
+            topicPartitions = brokerMetrics[idx]["topicPartitions"]
+            host = brokerMetrics[idx]["host"]
+            rack = brokerMetrics[idx]["rack"]
 
-        metricExpression = "aws.kafka.kafdrop.broker_partition: "
-        metricExpression = metricExpression + str(topicPartitions) + "; broker_id: " + brokerId + ", cluster_hostname: " + host + ", availability_zone: " + rack
-        print(metricExpression)
+            metricExpression = "aws.kafka.kafdrop.broker_partition: "
+            metricExpression = metricExpression + str(topicPartitions) + "; broker_id: " + brokerId + ", cluster_hostname: " + host + ", availability_zone: " + rack
+            print(metricExpression)
 
 
-    for idx, metricDict in brokerMetrics.items():
-        brokerId = brokerMetrics[idx]["brokerId"]
-        partitionsReplicas = brokerMetrics[idx]["partitionsReplicas"]
-        host = brokerMetrics[idx]["host"]
-        rack = brokerMetrics[idx]["rack"]
+        for idx, metricDict in brokerMetrics.items():
+            brokerId = brokerMetrics[idx]["brokerId"]
+            partitionsReplicas = brokerMetrics[idx]["partitionsReplicas"]
+            host = brokerMetrics[idx]["host"]
+            rack = brokerMetrics[idx]["rack"]
 
-        metricExpression = "aws.kafka.kafdrop.broker_partition_replicas: "
-        metricExpression = metricExpression + str(partitionsReplicas) + "; broker_id: " + brokerId + ", cluster_hostname: " + host + ", availability_zone: " + rack
-        print(metricExpression)
+            metricExpression = "aws.kafka.kafdrop.broker_partition_replicas: "
+            metricExpression = metricExpression + str(partitionsReplicas) + "; broker_id: " + brokerId + ", cluster_hostname: " + host + ", availability_zone: " + rack
+            print(metricExpression)
+    else: 
+        print("No metrics were found!")
+
 
 def printMessagesByTopicMetric():
     topics = requests.get(kafdropAddress +  "topic")
