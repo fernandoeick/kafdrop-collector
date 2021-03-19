@@ -5,3 +5,4 @@
 
     roles:
      - kafdrop-installation
+     - kafdrop-collector-installation

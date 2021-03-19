@@ -1,0 +1,3 @@
+---
+kafdrop_colector_location: /etc/kafdrop/
+kafka_cluster_address: http://localhost:9000/

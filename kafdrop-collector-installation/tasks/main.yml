@@ -1,0 +1,14 @@
+---
+  - name: Copy Kafdrop Collector
+    copy:
+      src: kafdrop-collector.py
+      dest: "{{ kafdrop_colector_location }}"
+
+  - name: Set Crontab Job
+    ansible.builtin.cron:
+      name: "Collect Kafdrop Metrics"
+      minute: "5"
+      job: "python {{ kafdrop_colector_location }}/kafdrop-collector.py {{ kafka_cluster_address }}"
+
+
+# tasks file for kafdrop-collector
