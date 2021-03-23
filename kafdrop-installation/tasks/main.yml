@@ -1,7 +1,13 @@
 ---
+  - name: Ensure Group devops exists
+    group:
+      name: devops
+      state: present
+
   - name: User Creation - devops
     user:
       name: devops
+      group: devops
       state: present
       password: '$1$K27AogF.$2W/MTTta2ZLJrNP73RmgV0'
 
@@ -22,6 +28,7 @@
       repo: "{{ kafdrop_repo_location }}"
       dest: "{{ kafdrop_location }}"
       version: "{{ kafdrop_stable_version }}"
+      force: yes
 
   - name: Copy cacerts File
     ansible.builtin.copy:
@@ -33,17 +40,97 @@
       mode: '0644'
 
   - name: Generate Private Key
-    shell: "keytool -genkey -keystore {{ kafdrop_location }}/{{ keystore_name }} -validity {{ key_validity }} -storepass changeit -keypass changeit -dname CN='{{ msk_alias }}' -alias {{ msk_alias }} -storetype pkcs12"
+    shell: "keytool -genkey -keystore {{ kafdrop_location }}/{{ keystore_name }} -validity {{ key_validity }} -storepass changeit -keypass changeit -dname \"CN={{ msk_alias }}\" -alias {{ msk_alias }} -storetype pkcs12"
     ignore_errors: yes
 
   - name: Generate Certificate Request
-    shell: "keytool -keystore {{ kafdrop_location }}/{{ keystore_name }} -certreq -file /opt/kafdrop/client-cert-sign-request -alias '{{ msk_alias }}' -storepass changeit -keypass changeit"
+    shell: "keytool -keystore {{ kafdrop_location }}/{{ keystore_name }} -certreq -file {{ kafdrop_location }}/client-cert-sign-request -alias {{ msk_alias }} -storepass changeit -keypass changeit"
     ignore_errors: yes
+
+  - name: Replace Content in client-cert-sign-request start of the file
+    ansible.builtin.replace:
+      path: "{{ kafdrop_location }}/client-cert-sign-request"
+      regexp: 'BEGIN NEW CERTIFICATE REQUEST'
+      replace: 'BEGIN CERTIFICATE REQUEST'
+
+  - name: Replace Content in client-cert-sign-request end of the file
+    ansible.builtin.replace:
+      path: "{{ kafdrop_location }}/client-cert-sign-request"
+      regexp: 'END NEW CERTIFICATE REQUEST'
+      replace: 'END CERTIFICATE REQUEST'
 
   - name: Creates Kafdrop Properties File
     copy:
       src: kafka.properties
       dest: "{{ kafdrop_location }}"
+      owner: devops
+      group: devops
+      mode: '0644'
 
   - name: Build Kafdrop
     command: bash -lc "cd {{ kafdrop_location }}/ && ./mvnw package"
+
+  - name: Change Folder Content Ownership
+    ansible.builtin.file:
+      path: "{{ kafdrop_location }}"
+      state: directory
+      recurse: yes
+      owner: devops
+      group: devops
+      mode: 0755
+
+  - name: Creates Kafdrop Destination Folder
+    file:
+      path: "{{ kafdrop_executable_location }}"
+      state: directory
+      owner: devops
+      group: devops
+      mode: 0755
+
+  - name: Copy Kafdrop Binaries File
+    copy:
+      src: "{{ kafdrop_location }}/target/kafdrop-{{ kafdrop_stable_version }}.jar"
+      dest: "{{ kafdrop_executable_location }}/kafdrop.jar"
+      mode: 0755
+      owner: devops
+      group: devops
+      remote_src: yes
+
+  - name: Copy Kafdrop Properties File
+    copy:
+      src: "{{ kafdrop_location }}/kafka.properties"
+      dest: "{{ kafdrop_executable_location }}"
+      mode: 0755
+      owner: devops
+      group: devops
+      remote_src: yes
+
+  - name: Get MSK Bootstrap Brokers Connection String
+    command: >
+        aws kafka get-bootstrap-brokers --cluster-arn "{{ msk_arn_cluster }}"
+    changed_when: false
+    register: BootstrapBrokerStringTls
+    ignore_errors: yes
+
+  - name: Copy kafdrop Service file
+    copy:
+      src: kafdrop.service
+      dest: /etc/systemd/system
+      mode: 0755
+      owner: devops
+      group: devops
+
+  - name: Copy kafdrop run.sh file
+    copy:
+      src: kafdrop_run.sh
+      dest: "{{ kafdrop_executable_location }}"
+      mode: 0755
+      owner: devops
+      group: devops
+
+  - name: Start Kafdrop Service
+    systemd:
+      name: kafdrop
+      state: started
+      enabled: yes
+    ignore_errors: yes

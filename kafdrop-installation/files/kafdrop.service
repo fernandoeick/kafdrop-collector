@@ -1,0 +1,8 @@
+[Unit]
+Description=Kafdrop Service
+
+[Service]
+ExecStart=/bin/bash /usr/local/bin/kafdrop/kafdrop_run.sh
+
+[Install]
+WantedBy=multi-user.target

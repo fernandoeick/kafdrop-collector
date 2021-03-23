@@ -8,7 +8,7 @@
     ansible.builtin.cron:
       name: "Collect Kafdrop Metrics"
       minute: "5"
-      job: "python {{ kafdrop_colector_location }}/kafdrop-collector.py {{ kafka_cluster_address }}"
+      job: "python {{ kafdrop_colector_location }}/kafdrop-collector.py {{ kafdrop_address }}"
 
 
 # tasks file for kafdrop-collector
