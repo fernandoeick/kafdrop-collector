@@ -1,6 +1,6 @@
 ---
 
-kafdrop_location: /opt/kafdrop
+kafdrop_location: /opt/kafdrop/
 kafdrop_executable_location: /usr/local/bin/kafdrop/
 kafdrop_repo_location: https://github.com/obsidiandynamics/kafdrop.git
 kafdrop_stable_version: 3.27.0
@@ -8,5 +8,6 @@ truststore_name: msk.truststore.jks
 keystore_name: msk.keystore.jks
 key_validity: 300
 msk_alias: ilegra-msk
-msk_arn_cluster: arn:aws:kafka:us-east-1:809395312771:cluster/demo-cluster/dfa6d245-cfa5-4f84-ad3a-4b1e2d2e3ae4-14
-msk_cluster_address: b-1.demo-cluster.yjztqg.c14.kafka.us-east-1.amazonaws.com:9094,b-4.demo-cluster.yjztqg.c14.kafka.us-east-1.amazonaws.com:9094,b-3.demo-cluster.yjztqg.c14.kafka.us-east-1.amazonaws.com:9094
+
+##Replace this variable
+kafdrop_address: http://localhost:9000/

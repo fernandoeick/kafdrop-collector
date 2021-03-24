@@ -105,14 +105,14 @@
       group: devops
       remote_src: yes
 
-  - name: Get MSK Bootstrap Brokers Connection String
-    command: >
-        aws kafka get-bootstrap-brokers --cluster-arn "{{ msk_arn_cluster }}"
-    changed_when: false
-    register: BootstrapBrokerStringTls
-    ignore_errors: yes
+#  - name: Get MSK Bootstrap Brokers Connection String
+#    command: >
+#        aws kafka get-bootstrap-brokers --cluster-arn "{{ msk_arn_cluster }}"
+#    changed_when: false
+#    register: BootstrapBrokerStringTls
+#    ignore_errors: yes
 
-  - name: Copy kafdrop Service file
+  - name: Copy kafdrop Service File
     copy:
       src: kafdrop.service
       dest: /etc/systemd/system
@@ -128,9 +128,23 @@
       owner: devops
       group: devops
 
+  - name: Copy Kafdrop Collector Script
+    copy:
+      src: kafdrop-collector.py
+      dest: "{{ kafdrop_executable_location }}"
+      mode: 0755
+      owner: devops
+      group: devops
+
   - name: Start Kafdrop Service
     systemd:
       name: kafdrop
       state: started
       enabled: yes
     ignore_errors: yes
+
+  - name: Set Kafdrop Collector Crontab Job
+    ansible.builtin.cron:
+      name: "Collect Kafdrop Metrics"
+      minute: "5"
+      job: "python {{ kafdrop_executable_location }}kafdrop-collector.py {{ kafdrop_address }}"
