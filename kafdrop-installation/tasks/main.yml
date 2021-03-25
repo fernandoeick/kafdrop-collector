@@ -22,6 +22,7 @@
        - amazon-linux-extras
        - git
        - java-11-amazon-corretto
+       - logrotate
 
   - name: Git Kafdrop Stable Version Checkout
     ansible.builtin.git:
