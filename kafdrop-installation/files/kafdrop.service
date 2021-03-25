@@ -1,8 +1,11 @@
 [Unit]
 Description=Kafdrop Service
+After=network.target
 
 [Service]
 ExecStart=/bin/bash /usr/local/bin/kafdrop/kafdrop_run.sh
+StandardOutput=append:/var/log/kafdrop-collector.log
+StandardError=append:/var/log/kafdrop-collector.err
 
 [Install]
 WantedBy=multi-user.target
