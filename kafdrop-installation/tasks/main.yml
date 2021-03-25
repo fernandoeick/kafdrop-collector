@@ -136,6 +136,16 @@
       mode: 0755
       owner: devops
       group: devops
+      remote_src: yes
+
+  - name: Copy Kafdrop Log Rotate Configuration File
+    copy:
+      src: kafdrop-collector.conf
+      dest: /etc/logrotate.d/
+      mode: 0755
+      owner: devops
+      group: devops
+      remote_src: yes
 
   - name: Start Kafdrop Service
     systemd:
