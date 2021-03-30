@@ -130,7 +130,7 @@
 
   - name: Copy Kafdrop Log Rotate Configuration File
     copy:
-      src: kafdrop-collector.conf
+      src: kafdrop-log.conf
       dest: /etc/logrotate.d/
       mode: 0755
       owner: devops
@@ -148,4 +148,4 @@
     ansible.builtin.cron:
       name: "Collect Kafdrop Metrics"
       minute: "5"
-      job: "python {{ kafdrop_executable_location }}kafdrop-collector.py {{ kafdrop_address }}"
+      job: "python {{ kafdrop_executable_location }}kafdrop-collector.py {{ kafdrop_address }} &> /var/log/kafdrop/kafdrop-collector.log"
