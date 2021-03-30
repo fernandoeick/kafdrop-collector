@@ -88,6 +88,14 @@
       group: devops
       mode: 0755
 
+  - name: Creates Kafdrop Logs Destination Folder
+    file:
+      path: /var/log/kafdrop/
+      state: directory
+      owner: devops
+      group: devops
+      mode: 0755
+
   - name: Copy Kafdrop Binaries File
     copy:
       src: "{{ kafdrop_location }}/target/kafdrop-{{ kafdrop_stable_version }}.jar"
