@@ -90,8 +90,16 @@
 
   - name: Creates Kafdrop Logs Destination Folder
     file:
-      path: /var/log/kafdrop/
+      path: "{{ kafdrop_logs_location }}kafdrop-collector.log"
       state: directory
+      owner: devops
+      group: devops
+      mode: 0755
+
+  - name: Initialize kafdrop-collector Log File
+    file:
+      path: "{{ kafdrop_logs_location }}kafdrop-collector.log"
+      state: touch
       owner: devops
       group: devops
       mode: 0755
@@ -100,10 +108,10 @@
     copy:
       src: "{{ kafdrop_location }}/target/kafdrop-{{ kafdrop_stable_version }}.jar"
       dest: "{{ kafdrop_executable_location }}/kafdrop.jar"
-      mode: 0755
       owner: devops
       group: devops
       remote_src: yes
+      mode: 0755
 
   - name: Copy Kafdrop Properties File
     copy:
@@ -156,4 +164,5 @@
     ansible.builtin.cron:
       name: "Collect Kafdrop Metrics"
       minute: "5"
-      job: "python {{ kafdrop_executable_location }}kafdrop-collector.py {{ kafdrop_address }} &> /var/log/kafdrop/kafdrop-collector.log"
+      job: "python {{ kafdrop_executable_location }}kafdrop-collector.py {{ kafdrop_address }} &> {{ kafdrop_logs_location }}kafdrop-collector.log
+    become: true

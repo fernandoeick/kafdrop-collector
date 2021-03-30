@@ -3,6 +3,7 @@
 kafdrop_location: /opt/kafdrop/
 kafdrop_executable_location: /usr/local/bin/kafdrop/
 kafdrop_repo_location: https://github.com/obsidiandynamics/kafdrop.git
+kafdrop_logs_location: /var/log/kafdrop/
 kafdrop_stable_version: 3.27.0
 truststore_name: msk.truststore.jks
 keystore_name: msk.keystore.jks
