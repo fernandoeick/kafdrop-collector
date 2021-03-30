@@ -1,11 +1,14 @@
 [Unit]
 Description=Kafdrop Service
-After=network.target
+Requires=network.target
+After=syslog.target network.target
 
 [Service]
-ExecStart=/bin/bash /usr/local/bin/kafdrop/kafdrop_run.sh
-StandardOutput=append:/var/log/kafdrop-collector/kafdrop-collector.log
-StandardError=append:/var/log/kafdrop-collector/kafdrop-collector.err
+User=root
+WorkingDirectory=/usr/local/bin/kafdrop/
+ExecStart=/bin/bash kafdrop_run.sh 
+StandardOutput=/var/log/kafdrop-collector/kafdrop-collector.log
+StandardError=/var/log/kafdrop-collector/kafdrop-collector.err
 
 [Install]
 WantedBy=multi-user.target
