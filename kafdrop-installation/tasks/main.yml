@@ -23,6 +23,12 @@
        - git
        - java-11-amazon-corretto
        - logrotate
+       - python3
+
+  - name: Install requests Module for Python 3
+    pip:
+      name: requests
+      executable: pip3.3
 
   - name: Git Kafdrop Stable Version Checkout
     ansible.builtin.git:
@@ -90,7 +96,7 @@
 
   - name: Creates Kafdrop Logs Destination Folder
     file:
-      path: "{{ kafdrop_logs_location }}kafdrop-collector.log"
+      path: "{{ kafdrop_logs_location }}"
       state: directory
       owner: devops
       group: devops
@@ -130,7 +136,7 @@
 
   - name: Copy kafdrop run.sh file
     copy:
-      src: kafdrop_run.sh
+      src: kafdrop-run.sh
       dest: "{{ kafdrop_executable_location }}"
       mode: 0755
       owner: devops
@@ -160,9 +166,14 @@
     ignore_errors: yes
     become: true
 
+  - name: Install requests Module for Python 3
+    pip:
+      name: requests
+      executable: pip3.3    
+
   - name: Set Kafdrop Collector Crontab Job
     ansible.builtin.cron:
       name: "Collect Kafdrop Metrics"
       minute: "5"
-      job: "python {{ kafdrop_executable_location }}kafdrop-collector.py {{ kafdrop_address }} &> {{ kafdrop_logs_location }}kafdrop-collector.log"
+      job: "python3 {{ kafdrop_executable_location }}kafdrop-collector.py {{ kafdrop_address }} &> {{ kafdrop_logs_location }}kafdrop-collector.log"
     become: true
