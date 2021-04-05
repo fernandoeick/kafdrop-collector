@@ -24,11 +24,7 @@
        - java-11-amazon-corretto
        - logrotate
        - python3
-
-  - name: Install requests Module for Python 3
-    pip:
-      name: requests
-      executable: pip3.3
+       - python3-pip
 
   - name: Git Kafdrop Stable Version Checkout
     ansible.builtin.git:
@@ -166,10 +162,10 @@
     ignore_errors: yes
     become: true
 
-  - name: Install requests Module for Python 3
+  - name: Install requests Module for Python3
     pip:
       name: requests
-      executable: pip3.3    
+      executable: pip3
 
   - name: Set Kafdrop Collector Crontab Job
     ansible.builtin.cron:
