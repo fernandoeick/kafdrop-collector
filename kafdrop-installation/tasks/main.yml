@@ -170,6 +170,6 @@
   - name: Set Kafdrop Collector Crontab Job
     ansible.builtin.cron:
       name: "Collect Kafdrop Metrics"
-      minute: "5"
+      minute: "*"
       job: "python3 {{ kafdrop_executable_location }}kafdrop-collector.py {{ kafdrop_address }} &> {{ kafdrop_logs_location }}kafdrop-collector.log"
     become: true
