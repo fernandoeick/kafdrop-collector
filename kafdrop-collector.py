@@ -2,9 +2,19 @@ import requests
 import json
 import sys
 import logging
+from datadog import initialize, statsd, api
+import time
 
 kafdropAddress = sys.argv[1]
 brokerMetrics = {}
+options = {
+    #'statsd_host':'127.0.0.1',
+    #'statsd_port':8125
+    'api_key': 'c79379bc72cface84a42bcb603d73eb3'
+}
+
+initialize(**options)
+now = int(time.time())
 
 def defineLogConfiguration():
     logger = logging.getLogger(__name__)
@@ -84,6 +94,7 @@ def getIdx(brokerIdToFind):
             return idx
 
 def printMetrics():
+
     if brokerMetrics:
         for idx, metricDict in brokerMetrics.items():
             brokerId = brokerMetrics[idx]["brokerId"]
@@ -91,9 +102,12 @@ def printMetrics():
             host = brokerMetrics[idx]["host"]
             rack = brokerMetrics[idx]["rack"]
 
-            metricExpression = "aws.kafka.kafdrop.broker_topics: "
-            metricExpression = metricExpression + str(len(topicNames)) + "; broker_id: " + brokerId + ", cluster_hostname: " + host + ", availability_zone: " + rack
-            logging.info(metricExpression)
+            metricName = "aws.kafka.kafdrop.broker_topics:"
+            metricTags = "topics_number: " + str(len(topicNames)) + ", broker_id: " + brokerId + ", cluster_hostname: " + host + ", availability_zone: " + rack + ","
+            #statsd.increment(metricName, tags=[metricTags])
+            api.Event.create(title="kafdrop-metrics", text=metricName, tags=metricTags)
+            logging.info(metricTags)
+            time.sleep(3)
 
         for idx, metricDict in brokerMetrics.items():
             brokerId = brokerMetrics[idx]["brokerId"]
@@ -101,19 +115,26 @@ def printMetrics():
             host = brokerMetrics[idx]["host"]
             rack = brokerMetrics[idx]["rack"]
 
-            metricExpression = "aws.kafka.kafdrop.broker_partition: "
-            metricExpression = metricExpression + str(topicPartitions) + "; broker_id: " + brokerId + ", cluster_hostname: " + host + ", availability_zone: " + rack
-            logging.info(metricExpression)
-
+            metricName = "aws.kafka.kafdrop.broker_partition:"
+            metricTags = "partitions_number:" + str(topicPartitions) + ", broker_id: " + brokerId + ", cluster_hostname: " + host + ", availability_zone: " + rack + ","
+            #statsd.increment(metricName, tags=[metricTags])
+            api.Event.create(title="kafdrop-metrics", text=metricName, tags=metricTags)
+            logging.info(metricTags)
+            time.sleep(3)
+            
         for idx, metricDict in brokerMetrics.items():
             brokerId = brokerMetrics[idx]["brokerId"]
             partitionsReplicas = brokerMetrics[idx]["partitionsReplicas"]
             host = brokerMetrics[idx]["host"]
             rack = brokerMetrics[idx]["rack"]
 
-            metricExpression = "aws.kafka.kafdrop.broker_partition_replicas: "
-            metricExpression = metricExpression + str(partitionsReplicas) + "; broker_id: " + brokerId + ", cluster_hostname: " + host + ", availability_zone: " + rack
-            logging.info(metricExpression)
+            metricName = "aws.kafka.kafdrop.broker_partition_replicas:"
+            metricTags = "replicas_number:" + str(partitionsReplicas) + ", broker_id: " + brokerId + ", cluster_hostname: " + host + ", availability_zone: " + rack + ","
+            logging.info(metricName + metricTags)
+            #statsd.increment(metricName, tags=[metricTags])
+            api.Event.create(title="kafdrop-metrics", text=metricName, tags=metricTags)
+            logging.info(metricTags)
+            time.sleep(3)
     else: 
         logging.error("No metrics were found!")
 
@@ -127,16 +148,16 @@ def printMessagesByTopicMetric():
             for topic in allTopics:
                 topicName = str(topic['name'])
                 if not(topicName.startswith("__")):
-                    metricExpression = "aws.kafka.kafdrop.topic_messages: "
                     topicName = str(topic['name'])
                     requestURL = kafdropAddress +  "topic/" + topicName + "/messages"
                     messagesJson = requests.get(requestURL, headers={'accept': 'application/json'})
                     messagesText = json.loads(messagesJson.text)
                     lastOffSet = messagesText[0]['lastOffset']
 
-                    metricExpression = "aws.kafka.kafdrop.topic_messages: "
-                    metricExpression = metricExpression + str(lastOffSet) + "; topic_name: " + topicName + ", cluster_hostname: " + "" + ", availability_zone: " + ""
-                    logging.info(metricExpression)
+                    metricName = "aws.kafka.kafdrop.topic_messages"
+                    metricTags = metricExpression + str(lastOffSet) + ", topic_name: " + topicName + ", cluster_hostname: " + "" + ", availability_zone: " + "" + ","
+                    api.Event.create(title="kafdrop-metrics", text=metricName, tags=metricTags)
+                    logging.info(metricTags)
 
         else:
             logging.warning("No topics were found!")

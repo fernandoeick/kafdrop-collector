@@ -1,7 +1,0 @@
----
-  - name: Install and Build Kafdrop Package
-    hosts: all
-    become: yes
-
-    roles:
-     - kafdrop-installation
