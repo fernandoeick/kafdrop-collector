@@ -56,7 +56,9 @@ def loadTopicMessagesMetric():
                         ]
 
                         statsd.increment(topicMessagesMetricName, tags=topicMessagesMetricTags)
-                        logging.info("metricName: " + topicMessagesMetricTags + "metricTags: " + topicMessagesMetricTags)
+                        logging.info("metricName: " + topicMessagesMetricName + "metricTags[" +
+                            "broker_id:"+brokerId+",partition_id:"+partitionId+",last_offset:"+lastOffSet+
+                            ",is_under_replicated:"+underReplicated+",cluster_name:"+clusterName+"]")
                 else:
                     logging.warning("No partitions were found in topic " + topicName)
         else:
