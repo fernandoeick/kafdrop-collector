@@ -8,7 +8,7 @@
             "name": "Python: Arquivo Atual",
             "type": "python",
             "request": "launch",
-            "program": "C:\\Users\\fernando.eickhoff\\repositories\\kafka\\phyton\\kafdrop-colllector.py",
+            "program": "kafdrop-collector.py",
             "console": "integratedTerminal",
             "args": ["http://localhost:9000/"]
         }

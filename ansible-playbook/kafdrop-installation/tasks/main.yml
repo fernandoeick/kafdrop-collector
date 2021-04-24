@@ -162,10 +162,15 @@
     ignore_errors: yes
     become: true
 
-  - name: Install requests Module for Python3
+  - name: Install datadog modules for Python3
     pip:
-      name: requests
+      name: "{{ modules }}"       
       executable: pip3
+    vars:
+      modules:
+       - requests
+       - datadog
+       - statsd
 
   - name: Set Kafdrop Collector Crontab Job
     ansible.builtin.cron:
