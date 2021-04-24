@@ -43,7 +43,7 @@ def loadTopicMessagesMetric():
 
                         brokerId = str(partition['leader']['id'])
                         partitionId = str(partition['id'])
-                        lastOffSet = lastOffSet
+                        lastOffSet = str(lastOffSet)
                         underReplicated = str(partition['underReplicated'])
                         clusterName = "my_cluster"
 
