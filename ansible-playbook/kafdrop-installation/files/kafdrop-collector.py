@@ -6,6 +6,8 @@ from datadog import initialize, statsd
 import time
 
 kafdropAddress = sys.argv[1]
+clusterName = sys.argv[2]
+
 brokerMetrics = {}
 options = {
     'statsd_host':'127.0.0.1',
@@ -45,20 +47,20 @@ def loadTopicMessagesMetric():
                         partitionId = str(partition['id'])
                         lastOffSet = str(lastOffSet)
                         underReplicated = str(partition['underReplicated'])
-                        clusterName = "my_cluster"
 
                         topicMessagesMetricTags = [
                             "broker_id:"+brokerId,
                             "partition_id:"+partitionId,
                             "last_offset:"+lastOffSet,
                             "is_under_replicated:"+underReplicated,
-                            "cluster_name:"+clusterName
+                            "cluster_name:"+clusterName,
+                            "topic_name:"+topicName
                         ]
 
-                        statsd.increment(topicMessagesMetricName, tags=topicMessagesMetricTags)
-                        logging.info("metricName: " + topicMessagesMetricName + "metricTags[" +
+                        statsd.gauges(topicMessagesMetricName, lastOffSet, tags=topicMessagesMetricTags)
+                        logging.info("metricName: " + topicMessagesMetricName + " - metricTags[" +
                             "broker_id:"+brokerId+",partition_id:"+partitionId+",last_offset:"+lastOffSet+
-                            ",is_under_replicated:"+underReplicated+",cluster_name:"+clusterName+"]")
+                            ",is_under_replicated:"+underReplicated+",cluster_name:"+clusterName+",topic_name:"+topicName+"]")
                 else:
                     logging.warning("No partitions were found in topic " + topicName)
         else:

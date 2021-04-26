@@ -8,7 +8,8 @@ kafdrop_stable_version: 3.27.0
 truststore_name: msk.truststore.jks
 keystore_name: msk.keystore.jks
 key_validity: 300
-msk_alias: ilegra-msk
+msk_alias: mskmaterializedviewci
+clusterName: mskmaterializedviewci
 
 ##Replace this variable
 kafdrop_address: http://localhost:9000/
