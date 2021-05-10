@@ -1,0 +1,16 @@
+---
+kafdrop_location: /opt/kafdrop/
+kafdrop_executable_location: /usr/local/bin/kafdrop/
+kafdrop_repo_location: https://github.com/obsidiandynamics/kafdrop.git
+kafdrop_logs_location: /var/log/kafdrop/
+kafdrop_stable_version: 3.27.0
+truststore_name: msk.truststore.jks
+keystore_name: msk.keystore.jks
+key_validity: 300
+
+##Replace these variables by env variables from CMDB
+kafdrop_address: http://localhost:9000/
+msk_alias: mskmaterializedviewci
+clusterName: mskmaterializedviewci
+kafdrop_enable_edition: false
+msk_brokers: b-1.demo-cluster.ore1bz.c2.kafka.us-east-2.amazonaws.com:9094,b-2.demo-cluster.ore1bz.c2.kafka.us-east-2.amazonaws.com:9094

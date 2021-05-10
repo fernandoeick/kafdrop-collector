@@ -7,6 +7,7 @@ After=syslog.target network.target
 User=root
 WorkingDirectory=/usr/local/bin/kafdrop/
 ExecStart=/bin/bash kafdrop-run.sh 
+#ExecStart=/bin/bash kafdrop-run.sh {{ kafdrop_executable_location }} {{ msk_brokers }} {{ kafdrop_logs_location }} {{ kafdrop_enable_edition }}
 StandardOutput=/var/log/kafdrop-collector/kafdrop-collector.log
 StandardError=/var/log/kafdrop-collector/kafdrop-collector.err
 
